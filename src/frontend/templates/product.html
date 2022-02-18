@@ -55,6 +55,13 @@
     </div>
   </div>
   <div>
+    <!-- New -->
+    {{ if $.reviews}}
+      {{ template "reviews" $.reviews }}
+    {{ end }}
+    {{ template "reviewsForm" $.product.Item.Id }}
+  </div>
+  <div>
     {{ if $.recommendations}}
       {{ template "recommendations" $.recommendations }}
     {{ end }}

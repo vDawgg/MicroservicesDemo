@@ -44,6 +44,9 @@ build:
     context: src/frontend
   - image: adservice
     context: src/adservice
+  # New
+  - image: reviewservice
+    context: src/reviewservice
   tagPolicy:
     gitCommit: {}
   local:
@@ -62,6 +65,8 @@ deploy:
     - ./kubernetes-manifests/recommendationservice.yaml
     - ./kubernetes-manifests/redis.yaml
     - ./kubernetes-manifests/shippingservice.yaml
+    # New 
+    - ./kubernetes-manifests/reviewservice.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker

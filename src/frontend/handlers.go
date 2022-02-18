@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
+	//rs "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto/reviewservice"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
 
@@ -176,6 +177,15 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// New
+	log.Println("Retrieving reviews productid:"+id)
+	reviews, err := fe.getReviews(r.Context(), id)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product reviews"), http.StatusInternalServerError)
+		return
+	}
+	log.Println("Reviews obtained!")
+
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
@@ -195,6 +205,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"show_currency":     true,
 		"currencies":        currencies,
 		"product":           product,
+		"reviews":			 reviews, // New
 		"recommendations":   recommendations,
 		"cart_size":         cartSize(cart),
 		"platform_css":      plat.css,
@@ -205,6 +216,40 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		log.Println(err)
 	}
 }
+
+// New
+func (fe *frontendServer) addReviewHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	
+	name := r.FormValue("name")
+	text := r.FormValue("text")
+	id := r.FormValue("id")
+	star := r.FormValue("star")
+	productID := r.FormValue("product_id")
+
+	if productID == "" {
+		renderHTTPError(log, r, w, errors.New("invalid form input"), http.StatusBadRequest)
+		return
+	}
+
+	_, err := fe.getProduct(r.Context(), productID)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("name:" + name + "; id:" + id + "; productID:" + productID + "; star:" + star + "; text:" + text)
+
+	if err := fe.insertReview(r.Context(), productID, name, id, star, text); err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add review"), http.StatusInternalServerError)
+		return
+	}
+
+	// Move to the product page
+	w.Header().Set("location", "/product/" + productID)
+	w.WriteHeader(http.StatusFound)
+}
+
 
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
