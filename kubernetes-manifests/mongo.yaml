@@ -2,21 +2,17 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: review-db
-    labels:
-    app: review-db
-    tier: db
 spec:
-  serviceName: "review-db"
+  serviceName: review-db
   replicas: 1
   selector:
     matchLabels:
       app: review-db
-      tier: db
   template:
     metadata:
       labels:
         app: review-db
-                tier: db
+        selector: review-db
     spec:
       containers:
       - name: review-db
@@ -36,11 +32,6 @@ metadata:
   labels:
     app: database
 spec:
-  type: ClusterIP
+  clusterIP: None
   selector:
     app: review-db
-  ports:
-  - name: review-db
-    port: 27017
-    targetPort: 27017
-    
