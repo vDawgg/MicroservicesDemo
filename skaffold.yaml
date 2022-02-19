@@ -17,6 +17,8 @@ kind: Config
 metadata:
   name: app
 build:
+requires:
+  - configs: [reviews]
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
   # must provide a "default repo" using one of the methods described
@@ -106,3 +108,12 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/loadgenerator.yaml
+
+apiVersion: skaffold/v2beta12
+kind: Config
+metadata:
+  name: reviews
+requires:
+  - git:
+      repo: https://github.com/vDawgg/ReviewService
+      
