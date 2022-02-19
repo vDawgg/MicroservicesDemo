@@ -1,4 +1,67 @@
 apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-db
+spec:
+  selector:
+    matchLabels:
+      app: review-db
+  template:
+    metadata:
+      labels:
+        app: review-db
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:latest
+                env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: bestusernameever
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: bestestandhardestpassword
+        ports:
+        - containerPort: 27017
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 27017
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 27017
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-db
+spec:
+  type: ClusterIP
+  selector:
+    app: review-db
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+
+
+
+
+
+
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: review-db
