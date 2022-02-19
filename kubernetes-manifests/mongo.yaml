@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: review-db
+    labels:
+    app: review-db
+    tier: db
+spec:
+  serviceName: "review-db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-db
+      tier: db
+  template:
+    metadata:
+      labels:
+        app: review-db
+                tier: db
+    spec:
+      containers:
+      - name: review-db
+        image: mongo:latest
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: bestusernameever
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: bestestandhardestpassword
+      nodeSelector:
+        kubernetes.io/hostname: review-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+  labels:
+    app: database
+spec:
+  type: ClusterIP
+  selector:
+    app: review-db
+  ports:
+  - name: review-db
+    port: 27017
+    targetPort: 27017
+    
