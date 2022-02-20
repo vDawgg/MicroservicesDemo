@@ -16,6 +16,9 @@ syntax = "proto3";
 
 package hipstershop;
 
+// Needed to generate new demo_pb.go with correct package
+option go_package = "./;hipstershop";
+
 // -----------------Cart service-----------------
 
 service CartService {
@@ -48,6 +51,7 @@ message Cart {
 }
 
 message Empty {}
+
 
 // ---------------Recommendation service----------
 

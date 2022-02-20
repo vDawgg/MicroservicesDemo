@@ -14,7 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PATH=$PATH:$GOPATH/bin
+# [START gke_frontend_genproto]
+
+#PATH=$PATH:$GOPATH/bin
 protodir=../../pb
 
-protoc --go_out=plugins=grpc:genproto -I $protodir $protodir/demo.proto
+# Modified to generate demo_grpc.pb.go and demo.pb.go with protoc-gen-go@v1.26
+# https://grpc.io/docs/languages/go/quickstart/
+protoc --go_out=./genproto --go_opt=paths=source_relative --go_opt=Mdemo.proto=./genproto \
+    --go-grpc_out=./genproto --go-grpc_opt=paths=source_relative -I $protodir $protodir/demo.proto
+
+protoc --go_out=./genproto/reviewservice --go_opt=paths=source_relative --go_opt=Mdemo.proto=./genproto/reviewservice \
+    --go-grpc_out=./genproto/reviewservice --go-grpc_opt=paths=source_relative -I $protodir $protodir/reviewservice.proto
+
+
+# [END gke_frontend_genproto]

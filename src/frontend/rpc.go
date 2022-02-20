@@ -16,11 +16,13 @@ package main
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
-
+	rs "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto/reviewservice"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -124,4 +126,41 @@ func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad
 		ContextKeys: ctxKeys,
 	})
 	return resp.GetAds(), errors.Wrap(err, "failed to get ads")
+}
+
+// New
+func (fe *frontendServer) getReviews(ctx context.Context, id string) ([]*rs.Review, error) {
+	log := ctx.Value(ctxKeyLog{}).(logrus.FieldLogger)
+	log.Println("frontend getReviews productid: " + id)
+	reviews, err := rs.NewReviewServiceClient(fe.reviewSvcConn).
+		GetReviews(ctx, &rs.ProductID{ProductId: id})
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("frontend getReviews finishing")
+	return reviews.Review, nil
+}
+
+// New
+func (fe *frontendServer) putReview(ctx context.Context, name string, star string, text string, productID string, date string) error {
+	intVar, err := strconv.Atoi(star)
+	if err != nil {
+		intVar = 0
+	}
+	s := int32(intVar)
+
+	review := rs.Review{
+		Name:      name,
+		Star:      s,
+		Text:      &text,
+		ProductId: productID,
+		Date:      date,
+	}
+
+	log.Println("frontend insertReviews:" + review.String())
+	_, err = rs.NewReviewServiceClient(fe.reviewSvcConn).PutReviews(ctx, &review)
+	log.Println("frontend insertReviews finishing")
+	return err
 }

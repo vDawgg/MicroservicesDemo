@@ -1,0 +1,28 @@
+
+{{ define "reviewsForm" }}
+<section class="reviewsForm">
+    <div class="container">
+      <div class="row">
+         <div class="col-xl-10 offset-xl-1">
+            <hr />
+            <br />
+            <h2>Send us your review!</h2>
+            <form action = "/review" method = "POST">
+               <input type="hidden" name="product_id" value="{{ . }}" />
+               Name : <br />
+               <input type = "text" name = "name" />
+               <br />
+               Star: <br />
+               <input type = "text" name = "star" />
+               <br />
+               Text : <br />
+               <textarea rows = "5" cols = "50" name = "text">Enter comment here...</textarea>
+               <br />
+               <input type="submit" value="Send" />
+            </form>
+            <br />
+         </div>
+      </div>
+    </div>
+</section>
+{{ end }}
