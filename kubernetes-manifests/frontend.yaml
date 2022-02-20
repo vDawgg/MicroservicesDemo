@@ -66,7 +66,8 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          # New
+          # To create a connection we need the environment variable. We have followed the previous name convention: REVIEW_SERVICE_ADDR
+          # reviewservice:6666 stands for the name of our repository where we are running the reviewservice and the port we are using for the connection.
           - name: REVIEW_SERVICE_ADDR
             value: "reviewservice:6666"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba

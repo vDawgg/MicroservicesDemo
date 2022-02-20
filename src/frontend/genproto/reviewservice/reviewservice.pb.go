@@ -4,8 +4,6 @@
 // 	protoc        v3.19.4
 // source: reviewservice.proto
 
-// New
-
 package hipstershop
 
 import (

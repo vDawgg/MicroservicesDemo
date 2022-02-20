@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//Added code to make gRPC calls to the reviewservice. This is used by handlers.
 package main
 
 import (
@@ -128,7 +129,8 @@ func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad
 	return resp.GetAds(), errors.Wrap(err, "failed to get ads")
 }
 
-// New
+// This function makes the call to GetReviews() through the gRPC connection. The argument is a Product that contains the product id
+// return the list of all Reviews of the product.
 func (fe *frontendServer) getReviews(ctx context.Context, id string) ([]*rs.Review, error) {
 	log := ctx.Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Println("frontend getReviews productid: " + id)
@@ -143,7 +145,8 @@ func (fe *frontendServer) getReviews(ctx context.Context, id string) ([]*rs.Revi
 	return reviews.Review, nil
 }
 
-// New
+// This method makes the call to PutReview() through the gRPC connection. It starts preparing the argument, which is a Review instance
+// And then it sends the call.
 func (fe *frontendServer) putReview(ctx context.Context, name string, star string, text string, productID string, date string) error {
 	intVar, err := strconv.Atoi(star)
 	if err != nil {

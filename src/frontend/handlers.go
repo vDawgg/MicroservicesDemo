@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Added code to manage the reviews retrieval and submit
 package main
 
 import (
@@ -177,7 +178,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// New
+	// In this method there is a new call to getReviews() in the rpc.go module that retrieves the reviews.
+	// If all works fine, the variable reviews keeps a list of instances of Review. 
 	log.Println("Retrieving reviews productid:" + id)
 	reviews, err := fe.getReviews(r.Context(), id)
 	if err != nil {
@@ -205,7 +207,9 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"show_currency":     true,
 		"currencies":        currencies,
 		"product":           product,
-		"reviews":           reviews, // New
+		"reviews":           reviews, // The handlers call the method ExecuteTemplate to load an HTML template in which
+									  //some variables can be used to display the information. In this case, we have included
+									  //the reviews variable
 		"recommendations":   recommendations,
 		"cart_size":         cartSize(cart),
 		"platform_css":      plat.css,
@@ -217,10 +221,11 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// New
+// Method that calls rpc.go to insert a new review of a product.
 func (fe *frontendServer) addReviewHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-
+	
+	// This method starts retrieving the information from the field of the form.
 	name := r.FormValue("name")
 	text := r.FormValue("text")
 	date := time.Now().Format("02-01-2006")
@@ -239,13 +244,12 @@ func (fe *frontendServer) addReviewHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	log.Println("name:" + name + "; date:" + date + "; productID:" + productID + "; star:" + star + "; text:" + text)
-
+	// After checking that the product exists, it calls putReview() method in rpc.go in order to send a call to put the review to the reviewservice.
 	if err := fe.putReview(r.Context(), name, star, text, productID, date); err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add review"), http.StatusInternalServerError)
 		return
 	}
-
-	// Move to the product page
+	// if the insertion is ok, we send a location header to the web browser to move to the product page of the same product
 	w.Header().Set("location", "/product/"+productID)
 	w.WriteHeader(http.StatusFound)
 }

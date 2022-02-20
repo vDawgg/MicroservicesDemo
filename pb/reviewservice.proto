@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/wrappers.proto";
 
-// New
+// Go requires the use of a package for the connection on both sides of the grpc communication
 package hipstershop;
 option go_package = "./;hipstershop";
 
