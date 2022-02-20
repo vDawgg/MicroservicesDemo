@@ -67,6 +67,8 @@ deploy:
     - ./kubernetes-manifests/shippingservice.yaml
     # New 
     - ./kubernetes-manifests/reviewservice.yaml
+    - ./kubernetes-manifests/mongodb-pvc.yaml
+    - ./kubernetes-manifests/mongodb-deployment.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker

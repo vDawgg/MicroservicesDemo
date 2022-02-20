@@ -178,7 +178,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	// New
-	log.Println("Retrieving reviews productid:"+id)
+	log.Println("Retrieving reviews productid:" + id)
 	reviews, err := fe.getReviews(r.Context(), id)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product reviews"), http.StatusInternalServerError)
@@ -205,7 +205,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"show_currency":     true,
 		"currencies":        currencies,
 		"product":           product,
-		"reviews":			 reviews, // New
+		"reviews":           reviews, // New
 		"recommendations":   recommendations,
 		"cart_size":         cartSize(cart),
 		"platform_css":      plat.css,
@@ -220,10 +220,10 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 // New
 func (fe *frontendServer) addReviewHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-	
+
 	name := r.FormValue("name")
 	text := r.FormValue("text")
-	id := r.FormValue("id")
+	date := time.Now().Format("02-01-2006")
 	star := r.FormValue("star")
 	productID := r.FormValue("product_id")
 
@@ -238,18 +238,17 @@ func (fe *frontendServer) addReviewHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	log.Println("name:" + name + "; id:" + id + "; productID:" + productID + "; star:" + star + "; text:" + text)
+	log.Println("name:" + name + "; date:" + date + "; productID:" + productID + "; star:" + star + "; text:" + text)
 
-	if err := fe.insertReview(r.Context(), productID, name, id, star, text); err != nil {
+	if err := fe.putReview(r.Context(), name, star, text, productID, date); err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add review"), http.StatusInternalServerError)
 		return
 	}
 
 	// Move to the product page
-	w.Header().Set("location", "/product/" + productID)
+	w.Header().Set("location", "/product/"+productID)
 	w.WriteHeader(http.StatusFound)
 }
-
 
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)

@@ -8,14 +8,9 @@
             <br />
             <h2>Send us your review!</h2>
             <form action = "/review" method = "POST">
-            <!--   Product Id: {{ . }}
-               <br /> -->
                <input type="hidden" name="product_id" value="{{ . }}" />
                Name : <br />
                <input type = "text" name = "name" />
-               <br />
-               Id (for test purposes only): <br />
-               <input type = "text" name = "id" />
                <br />
                Star: <br />
                <input type = "text" name = "star" />

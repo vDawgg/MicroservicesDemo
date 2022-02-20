@@ -16,9 +16,8 @@ package main
 
 import (
 	"context"
-	"time"
-	"io"
 	"strconv"
+	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	rs "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto/reviewservice"
@@ -133,36 +132,19 @@ func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad
 func (fe *frontendServer) getReviews(ctx context.Context, id string) ([]*rs.Review, error) {
 	log := ctx.Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Println("frontend getReviews productid: " + id)
-	stream, err := rs.NewReviewServiceClient(fe.reviewSvcConn).
-		GetReviews(ctx, &rs.Product{ProductId: &id})
-	
+	reviews, err := rs.NewReviewServiceClient(fe.reviewSvcConn).
+		GetReviews(ctx, &rs.ProductID{ProductId: id})
+
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("frontend getReviews going ahead " + id)
-
-	var out []*rs.Review
-	
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatalf("can not receive %v", err)
-			return nil, err
-		}
-		log.Printf("Resp received: %s", resp.Name)
-		out = append(out, resp)
-	}
-
 	log.Println("frontend getReviews finishing")
-	return out, nil
+	return reviews.Review, nil
 }
 
 // New
-func (fe *frontendServer) insertReview(ctx context.Context, productID string, name string, id string, star string, text string) error {
+func (fe *frontendServer) putReview(ctx context.Context, name string, star string, text string, productID string, date string) error {
 	intVar, err := strconv.Atoi(star)
 	if err != nil {
 		intVar = 0
@@ -170,11 +152,12 @@ func (fe *frontendServer) insertReview(ctx context.Context, productID string, na
 	s := int32(intVar)
 
 	review := rs.Review{
-		Id: &id,
-		Name: &name,
-		Star: &s,
-		Text: &text,
-		ProductId: &productID}
+		Name:      name,
+		Star:      s,
+		Text:      &text,
+		ProductId: productID,
+		Date:      date,
+	}
 
 	log.Println("frontend insertReviews:" + review.String())
 	_, err = rs.NewReviewServiceClient(fe.reviewSvcConn).PutReviews(ctx, &review)
